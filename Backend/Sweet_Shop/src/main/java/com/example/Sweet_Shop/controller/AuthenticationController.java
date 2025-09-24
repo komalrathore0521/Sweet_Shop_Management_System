@@ -1,9 +1,7 @@
 package com.example.Sweet_Shop.controller;
 
-
-
 import com.example.Sweet_Shop.model.User;
-import com.example.Sweet_Shop.repository.UserRepository;
+import com.example.Sweet_Shop.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
 
+    private final AuthService authService;
+
     @Autowired
-    private UserRepository userRepository;
+    public AuthenticationController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<Void> registerUser(@RequestBody User user) {
-        // For now, we just save the user. No validation, no password hashing.
-        userRepository.save(user);
-        // We return a 201 Created status, which is what the test expects.
+        authService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
+
