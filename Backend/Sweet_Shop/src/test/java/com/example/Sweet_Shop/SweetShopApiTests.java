@@ -106,5 +106,18 @@ public class SweetShopApiTests {
                         .header("Authorization", "Bearer " + this.authToken))
                 .andExpect(status().isCreated()); // <-- FIX: It should expect 201 Created
     }
+    @Test
+    void whenAddSweetWithInvalidData_thenReturns400BadRequest() throws Exception {
+        // --- Arrange: Sweet data with a blank name ---
+        String invalidSweetJson = "{\"name\":\"\", \"category\":\"Invalid\", \"price\":1.0, \"quantity\":10}";
+
+        // --- Act & Assert ---
+        mockMvc.perform(post("/api/sweets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidSweetJson)
+                        .header("Authorization", "Bearer " + this.authToken))
+                // We expect a 400 Bad Request status because the data is invalid
+                .andExpect(status().isBadRequest());
+    }
 }
 
