@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,5 +51,27 @@ public class AuthenticationControllerTests {
                         .content(newUserJson))
                 // This time, we expect the server to respond with a 409 Conflict status
                 .andExpect(status().isConflict());
+    }
+    @Test
+    void whenLoginWithValidCredentials_thenReturns200OkAndJwt() throws Exception {
+
+        String userJson = "{\"username\":\"loginuser\", \"password\":\"password123\", \"email\":\"login@example.com\"}";
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userJson))
+                .andExpect(status().isCreated());
+
+        // This is the data for the login attempt.
+        String loginJson = "{\"username\":\"loginuser\", \"password\":\"password123\"}";
+
+        // --- Act & Assert ---
+        // Perform a POST request to the login endpoint.
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                // We expect the server to respond with a 200 OK status.
+                .andExpect(status().isOk())
+                // We expect the response body to contain a property named "token".
+                .andExpect(jsonPath("$.token").exists());
     }
 }
