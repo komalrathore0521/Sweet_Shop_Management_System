@@ -65,6 +65,14 @@ public class SweetService {
         sweet.setQuantity(sweet.getQuantity() - 1);
         return sweetRepository.save(sweet);
     }
+    // --- NEW RESTOCK METHOD ---
+    public Sweet restockSweet(Long id, int quantityToAdd) {
+        Sweet sweet = sweetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sweet not found with id: " + id));
+
+        sweet.setQuantity(sweet.getQuantity() + quantityToAdd);
+        return sweetRepository.save(sweet);
+    }
     public List<Sweet> searchSweets(String name, String category, Double minPrice, Double maxPrice) {
         // Use a Specification to build a dynamic query based on the provided criteria
         Specification<Sweet> spec = (root, query, criteriaBuilder) -> {

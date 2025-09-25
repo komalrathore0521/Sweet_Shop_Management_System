@@ -1,6 +1,7 @@
 package com.example.Sweet_Shop.controller;
 
 
+import com.example.Sweet_Shop.dto.RestockRequest;
 import com.example.Sweet_Shop.model.Sweet;
 import com.example.Sweet_Shop.service.SweetService;
 import jakarta.validation.Valid;
@@ -64,6 +65,13 @@ public class SweetsController {
     @PostMapping("/{id}/purchase")
     public ResponseEntity<Sweet> purchaseSweet(@PathVariable Long id) {
         Sweet updatedSweet = sweetService.purchaseSweet(id);
+        return ResponseEntity.ok(updatedSweet);
+    }
+    // --- NEW ADMIN-ONLY RESTOCK ENDPOINT ---
+    @PostMapping("/{id}/restock")
+    @PreAuthorize("hasRole('ADMIN')") // This enforces the "Admin only" rule
+    public ResponseEntity<Sweet> restockSweet(@PathVariable Long id, @RequestBody RestockRequest restockRequest) {
+        Sweet updatedSweet = sweetService.restockSweet(id, restockRequest.getQuantity());
         return ResponseEntity.ok(updatedSweet);
     }
 }
