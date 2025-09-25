@@ -18,8 +18,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -166,6 +165,23 @@ public class SweetShopApiTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name", is("Jalebi")));
+    }
+    @Test
+    void whenUpdateSweet_thenReturns200OkAndUpdatedSweet() throws Exception {
+        // --- Arrange: Create a sweet to update ---
+        Sweet originalSweet = sweetRepository.save(new Sweet("Old Rasgulla", "Bengali", 1.0, 50));
+        Long sweetId = originalSweet.getId();
+
+        String updatedSweetJson = "{\"name\":\"New Rasgulla\", \"category\":\"Bengali Classic\", \"price\":1.50, \"quantity\":75}";
+
+        // --- Act & Assert ---
+        mockMvc.perform(put("/api/sweets/" + sweetId) // Use the ID in the URL
+                        .header("Authorization", "Bearer " + this.authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updatedSweetJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("New Rasgulla")))
+                .andExpect(jsonPath("$.price", is(1.50)));
     }
 }
 
