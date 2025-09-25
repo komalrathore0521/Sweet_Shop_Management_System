@@ -41,6 +41,14 @@ public class SweetService {
                     return sweetRepository.save(existingSweet);
                 });
     }
+    // --- NEW DELETE METHOD ---
+    public boolean deleteSweet(Long id) {
+        if (sweetRepository.existsById(id)) {
+            sweetRepository.deleteById(id);
+            return true; // Return true if deletion was successful
+        }
+        return false; // Return false if the sweet did not exist
+    }
     public List<Sweet> searchSweets(String name, String category, Double minPrice, Double maxPrice) {
         // Use a Specification to build a dynamic query based on the provided criteria
         Specification<Sweet> spec = (root, query, criteriaBuilder) -> {
