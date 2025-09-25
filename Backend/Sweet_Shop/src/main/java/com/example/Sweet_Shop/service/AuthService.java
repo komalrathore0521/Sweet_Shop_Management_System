@@ -36,8 +36,11 @@ public class AuthService {
                 });
 
         // Step 3: If no user exists, hash the password.
+        user.setRole("ROLE_USER"); // Assign default role
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
+
+
 
         // Step 4: Save the new user with the hashed password.
         return userRepository.save(user);
@@ -49,8 +52,9 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, password)
         );
 
-        // If authentication is successful, generate and return a token
-        return jwtUtil.generateToken(username);
+        User user = userRepository.findByUsernameOrEmail(username, username).get();
+
+        return jwtUtil.generateToken(user.getUsername(), user.getRole());
     }
 }
 

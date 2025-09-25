@@ -53,4 +53,10 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+    // In your User.java class
+    private String role;
+
+    // ... and add the getter and setter for it
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

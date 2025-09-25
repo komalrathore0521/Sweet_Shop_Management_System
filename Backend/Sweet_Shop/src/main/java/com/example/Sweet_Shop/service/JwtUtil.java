@@ -74,5 +74,16 @@ public class JwtUtil {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
+    // In JwtUtil.java
+    public String generateToken(String username, String role) { // <-- Add role parameter
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role); // <-- Add the role as a "claim"
+        return createToken(claims, username);
+    }
+    public String extractRole(String token) {
+        final Claims claims = extractAllClaims(token);
+        return (String) claims.get("role");
+    }
+
 }
 
