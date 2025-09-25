@@ -3,6 +3,7 @@ package com.example.Sweet_Shop.controller;
 
 import com.example.Sweet_Shop.model.Sweet;
 import com.example.Sweet_Shop.service.SweetService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class SweetsController {
     }
 
     @PostMapping
-    public ResponseEntity<Sweet> addSweet(@RequestBody Sweet sweet) {
+    public ResponseEntity<Sweet> addSweet(@Valid @RequestBody Sweet sweet) { // <-- Add @Valid annotation here
         Sweet newSweet = sweetService.addSweet(sweet);
         return new ResponseEntity<>(newSweet, HttpStatus.CREATED);
     }
