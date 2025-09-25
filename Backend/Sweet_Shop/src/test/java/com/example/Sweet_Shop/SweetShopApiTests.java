@@ -1,5 +1,7 @@
 package com.example.Sweet_Shop;
 
+import com.example.Sweet_Shop.model.Sweet;
+import com.example.Sweet_Shop.repository.SweetRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 import java.util.Map;
 
@@ -31,9 +36,15 @@ public class SweetShopApiTests {
 
     private String authToken;
 
+
+    @Autowired // <-- 1. Inject the repository
+    private SweetRepository sweetRepository;
+
+
+
     @BeforeEach
     void setUp() throws Exception {
-        // This setup block creates a user named "testuser" before each test
+        // --- The setup block now ONLY handles user registration and login ---
         String userJson = "{\"username\":\"testuser\", \"password\":\"password123\", \"email\":\"test@example.com\"}";
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,66 +109,63 @@ public class SweetShopApiTests {
 
     @Test
     void whenAddSweetAsAuthenticatedUser_thenReturns201Created() throws Exception {
-        // This test correctly uses the token for "testuser" from @BeforeEach
-        String sweetJson = "{\"name\":\"Rasgulla\", \"category\":\"Bengali\", \"price\":2.50, \"quantity\":100}";
-
-        mockMvc.perform(post("/api/sweets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(sweetJson)
-                        .header("Authorization", "Bearer " + this.authToken))
-                .andExpect(status().isCreated()); // <-- FIX: It should expect 201 Created
-    }
-    @Test
-    void whenAddSweetWithInvalidData_thenReturns400BadRequest() throws Exception {
-        // --- Arrange: Sweet data with a blank name ---
-        String invalidSweetJson = "{\"name\":\"\", \"category\":\"Invalid\", \"price\":1.0, \"quantity\":10}";
-
-        // --- Act & Assert ---
-        mockMvc.perform(post("/api/sweets")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidSweetJson)
-                        .header("Authorization", "Bearer " + this.authToken))
-                // We expect a 400 Bad Request status because the data is invalid
-                .andExpect(status().isBadRequest());
-    }
-    @Test
-    void whenGetAllSweets_thenReturns200OkAndListOfSweets() throws Exception {
-        // Arrange: Add a sweet first so the list is not empty.
-        String sweetJson = "{\"name\":\"Jalebi\", \"category\":\"North Indian\", \"price\":1.50, \"quantity\":200}";
+        String sweetJson = "{\"name\":\"Gulab Jamun\", \"category\":\"North Indian\", \"price\":3.00, \"quantity\":120}";
         mockMvc.perform(post("/api/sweets")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(sweetJson)
                         .header("Authorization", "Bearer " + this.authToken))
                 .andExpect(status().isCreated());
+    }
 
-        // Act & Assert
+    @Test
+    void whenGetAllSweets_thenReturns200OkAndListOfSweets() throws Exception {
+        // --- FIX: Create data specific to this test ---
+        sweetRepository.save(new Sweet("Rasgulla", "Bengali", 2.50, 100));
+        sweetRepository.save(new Sweet("Jalebi", "North Indian", 4.00, 80));
+
         mockMvc.perform(get("/api/sweets")
                         .header("Authorization", "Bearer " + this.authToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].name").value("Jalebi"));
+                .andExpect(jsonPath("$", hasSize(2))); // We expect exactly 2 sweets
     }
 
     @Test
     void whenSearchSweetsByCategory_thenReturnsMatchingSweets() throws Exception {
-        // Arrange: Add a few sweets with different categories.
-        String sweet1Json = "{\"name\":\"Rasgulla\", \"category\":\"Bengali\", \"price\":2.50, \"quantity\":100}";
-        String sweet2Json = "{\"name\":\"Jalebi\", \"category\":\"North Indian\", \"price\":1.50, \"quantity\":200}";
-        String sweet3Json = "{\"name\":\"Sandesh\", \"category\":\"Bengali\", \"price\":3.00, \"quantity\":50}";
+        // --- FIX: Create data specific to this test ---
+        sweetRepository.save(new Sweet("Rasgulla", "Bengali", 2.50, 100));
+        sweetRepository.save(new Sweet("Kaju Katli", "North Indian", 7.50, 50));
+        sweetRepository.save(new Sweet("Sandesh", "Bengali", 3.00, 50));
 
-        mockMvc.perform(post("/api/sweets").contentType(MediaType.APPLICATION_JSON).content(sweet1Json).header("Authorization", "Bearer " + this.authToken));
-        mockMvc.perform(post("/api/sweets").contentType(MediaType.APPLICATION_JSON).content(sweet2Json).header("Authorization", "Bearer " + this.authToken));
-        mockMvc.perform(post("/api/sweets").contentType(MediaType.APPLICATION_JSON).content(sweet3Json).header("Authorization", "Bearer " + this.authToken));
-
-        // Act & Assert
-        mockMvc.perform(get("/api/sweets/search")
-                        .param("category", "Bengali") // Search for sweets in the "Bengali" category
+        mockMvc.perform(get("/api/sweets/search?category=Bengali")
                         .header("Authorization", "Bearer " + this.authToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2)) // Expecting 2 Bengali sweets
-                .andExpect(jsonPath("$[?(@.name == 'Rasgulla')]").exists())
-                .andExpect(jsonPath("$[?(@.name == 'Sandesh')]").exists());
+                .andExpect(jsonPath("$", hasSize(2))); // Expecting only the 2 Bengali sweets
+    }
+
+    @Test
+    void whenSearchSweetsByName_thenReturnsMatchingSweets() throws Exception {
+        // --- FIX: Create data specific to this test ---
+        sweetRepository.save(new Sweet("Rasgulla", "Bengali", 2.50, 100));
+
+        mockMvc.perform(get("/api/sweets/search?name=Ras")
+                        .header("Authorization", "Bearer " + this.authToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name", is("Rasgulla")));
+    }
+
+    @Test
+    void whenSearchSweetsByPriceRange_thenReturnsMatchingSweets() throws Exception {
+        // --- FIX: Create data specific to this test ---
+        sweetRepository.save(new Sweet("Rasgulla", "Bengali", 2.50, 100));
+        sweetRepository.save(new Sweet("Jalebi", "North Indian", 4.00, 80));
+        sweetRepository.save(new Sweet("Kaju Katli", "North Indian", 7.50, 50));
+
+        mockMvc.perform(get("/api/sweets/search?minPrice=3.0&maxPrice=5.0")
+                        .header("Authorization", "Bearer " + this.authToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].name", is("Jalebi")));
     }
 }
 

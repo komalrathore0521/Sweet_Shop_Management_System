@@ -28,6 +28,13 @@ public class Sweet {
     public Sweet() {
     }
 
+    public Sweet(String name, String category, double price, int quantity) {
+        this.name=name;
+        this.category=category;
+        this.price=price;
+        this.quantity=quantity;
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;

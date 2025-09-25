@@ -5,7 +5,10 @@ import com.example.Sweet_Shop.model.Sweet;
 import com.example.Sweet_Shop.repository.SweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,13 +30,34 @@ public class SweetService {
     public List<Sweet> getAllSweets() {
         return sweetRepository.findAll();
     }
-    public List<Sweet> searchSweets(String category) {
-        // For now, we only handle the category parameter to pass the test.
-        if (category != null) {
-            return sweetRepository.findByCategory(category);
-        }
-        // Return an empty list if no search criteria are provided
-        return Collections.emptyList();
+    public List<Sweet> searchSweets(String name, String category, Double minPrice, Double maxPrice) {
+        // Use a Specification to build a dynamic query based on the provided criteria
+        Specification<Sweet> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (name != null && !name.isEmpty()) {
+                // Add a condition for a case-insensitive "contains" search on the name
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+            if (category != null && !category.isEmpty()) {
+                // Add a condition for an exact match on the category
+                predicates.add(criteriaBuilder.equal(root.get("category"), category));
+            }
+            if (minPrice != null) {
+                // Add a condition for the price being greater than or equal to minPrice
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice));
+            }
+            if (maxPrice != null) {
+                // Add a condition for the price being less than or equal to maxPrice
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice));
+            }
+
+            // Combine all the individual conditions with an "AND"
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Execute the dynamic query
+        return sweetRepository.findAll(spec);
     }
 }
 
