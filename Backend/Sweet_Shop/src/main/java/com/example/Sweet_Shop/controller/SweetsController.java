@@ -42,5 +42,11 @@ public class SweetsController {
         List<Sweet> sweets = sweetService.searchSweets(name, category, minPrice, maxPrice);
         return ResponseEntity.ok(sweets);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Sweet> updateSweet(@PathVariable Long id, @Valid @RequestBody Sweet sweetDetails) {
+        return sweetService.updateSweet(id, sweetDetails)
+                .map(ResponseEntity::ok) // If sweet is found and updated, return 200 OK with the sweet
+                .orElse(ResponseEntity.notFound().build()); // If sweet is not found, return 404 Not Found
+    }
 }
 

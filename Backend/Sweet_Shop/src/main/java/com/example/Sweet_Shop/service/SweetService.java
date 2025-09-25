@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SweetService {
@@ -29,6 +30,16 @@ public class SweetService {
     }
     public List<Sweet> getAllSweets() {
         return sweetRepository.findAll();
+    }
+    public Optional<Sweet> updateSweet(Long id, Sweet sweetDetails) {
+        return sweetRepository.findById(id)
+                .map(existingSweet -> {
+                    existingSweet.setName(sweetDetails.getName());
+                    existingSweet.setCategory(sweetDetails.getCategory());
+                    existingSweet.setPrice(sweetDetails.getPrice());
+                    existingSweet.setQuantity(sweetDetails.getQuantity());
+                    return sweetRepository.save(existingSweet);
+                });
     }
     public List<Sweet> searchSweets(String name, String category, Double minPrice, Double maxPrice) {
         // Use a Specification to build a dynamic query based on the provided criteria
