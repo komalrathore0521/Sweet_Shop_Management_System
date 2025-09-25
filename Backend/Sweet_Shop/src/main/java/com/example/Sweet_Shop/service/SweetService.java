@@ -1,6 +1,7 @@
 package com.example.Sweet_Shop.service;
 
 
+import com.example.Sweet_Shop.exception.InvalidPurchaseException;
 import com.example.Sweet_Shop.model.Sweet;
 import com.example.Sweet_Shop.repository.SweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,21 @@ public class SweetService {
             return true; // Return true if deletion was successful
         }
         return false; // Return false if the sweet did not exist
+    }
+    // --- NEW PURCHASE METHOD ---
+    public Sweet purchaseSweet(Long id) {
+        // Find the sweet or throw an exception if it doesn't exist
+        Sweet sweet = sweetRepository.findById(id)
+                .orElseThrow(() -> new InvalidPurchaseException("Sweet not found with id: " + id));
+
+        // Check if the sweet is in stock
+        if (sweet.getQuantity() <= 0) {
+            throw new InvalidPurchaseException("Sweet is out of stock.");
+        }
+
+        // Decrement quantity and save
+        sweet.setQuantity(sweet.getQuantity() - 1);
+        return sweetRepository.save(sweet);
     }
     public List<Sweet> searchSweets(String name, String category, Double minPrice, Double maxPrice) {
         // Use a Specification to build a dynamic query based on the provided criteria
