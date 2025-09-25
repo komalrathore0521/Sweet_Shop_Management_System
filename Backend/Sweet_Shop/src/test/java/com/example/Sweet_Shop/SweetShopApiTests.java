@@ -195,5 +195,31 @@ public class SweetShopApiTests {
                         .header("Authorization", "Bearer " + adminAuthToken))
                 .andExpect(status().isNoContent());
     }
+    //Inventory API test
+    // --- NEW FAILING TESTS FOR PURCHASE ---
+    @Test
+    void whenPurchaseInStockSweet_thenReturns200OkAndDecrementedQuantity() throws Exception {
+        // Arrange: Create a sweet with quantity 10
+        Sweet sweet = sweetRepository.save(new Sweet("Kaju Katli", "North Indian", 7.50, 10));
+        Long sweetId = sweet.getId();
+
+        // Act & Assert
+        mockMvc.perform(post("/api/sweets/" + sweetId + "/purchase")
+                        .header("Authorization", "Bearer " + this.userAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity", is(9))); // Expect quantity to be 9
+    }
+
+    @Test
+    void whenPurchaseOutOfStockSweet_thenReturns400BadRequest() throws Exception {
+        // Arrange: Create a sweet with quantity 0
+        Sweet sweet = sweetRepository.save(new Sweet("Jalebi", "North Indian", 4.00, 0));
+        Long sweetId = sweet.getId();
+
+        // Act & Assert
+        mockMvc.perform(post("/api/sweets/" + sweetId + "/purchase")
+                        .header("Authorization", "Bearer " + this.userAuthToken))
+                .andExpect(status().isBadRequest());
+    }
 }
 
