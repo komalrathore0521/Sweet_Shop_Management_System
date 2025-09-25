@@ -32,5 +32,10 @@ public class SweetsController {
         List<Sweet> sweets = sweetService.getAllSweets();
         return ResponseEntity.ok(sweets);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<Sweet>> searchSweets(@RequestParam(required = false) String category) {
+        List<Sweet> sweets = sweetService.searchSweets(category);
+        return ResponseEntity.ok(sweets);
+    }
 }
 

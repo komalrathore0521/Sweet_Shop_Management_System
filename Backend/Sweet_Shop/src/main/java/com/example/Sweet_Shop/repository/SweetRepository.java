@@ -6,8 +6,11 @@ import com.example.Sweet_Shop.model.Sweet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface SweetRepository extends JpaRepository<Sweet, Long> {
+    List<Sweet> findByCategory(String category);
 }
 
 

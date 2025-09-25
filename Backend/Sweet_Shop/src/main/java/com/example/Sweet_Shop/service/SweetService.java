@@ -6,6 +6,7 @@ import com.example.Sweet_Shop.repository.SweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -25,5 +26,14 @@ public class SweetService {
     }
     public List<Sweet> getAllSweets() {
         return sweetRepository.findAll();
-    }}
+    }
+    public List<Sweet> searchSweets(String category) {
+        // For now, we only handle the category parameter to pass the test.
+        if (category != null) {
+            return sweetRepository.findByCategory(category);
+        }
+        // Return an empty list if no search criteria are provided
+        return Collections.emptyList();
+    }
+}
 
