@@ -6,6 +6,8 @@ import com.example.Sweet_Shop.repository.SweetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SweetService {
 
@@ -21,5 +23,7 @@ public class SweetService {
         // We will add validation in the refactor phase.
         return sweetRepository.save(sweet);
     }
-}
+    public List<Sweet> getAllSweets() {
+        return sweetRepository.findAll();
+    }}
 
