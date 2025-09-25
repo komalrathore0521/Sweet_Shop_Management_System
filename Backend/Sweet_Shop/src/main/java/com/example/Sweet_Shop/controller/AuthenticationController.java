@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
@@ -25,6 +27,13 @@ public class AuthenticationController {
     public ResponseEntity<Void> registerUser(@RequestBody User user) {
         authService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        String token = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        // Return the token in a JSON object like {"token": "your_jwt_here"}
+        // The test expects this specific structure.
+        return ResponseEntity.ok(Map.of("token", token));
     }
 }
 
