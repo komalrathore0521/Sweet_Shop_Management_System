@@ -221,5 +221,38 @@ public class SweetShopApiTests {
                         .header("Authorization", "Bearer " + this.userAuthToken))
                 .andExpect(status().isBadRequest());
     }
+    // --- NEW FAILING TESTS FOR RESTOCK ---
+    @Test
+    void whenRestockSweetAsUser_thenReturns403Forbidden() throws Exception {
+        // Arrange: Create a sweet to restock
+        Sweet sweet = sweetRepository.save(new Sweet("Kaju Katli", "North Indian", 7.50, 10));
+        Long sweetId = sweet.getId();
+
+        String restockJson = "{\"quantity\": 50}";
+
+        // Act & Assert
+        mockMvc.perform(post("/api/sweets/" + sweetId + "/restock")
+                        .header("Authorization", "Bearer " + this.userAuthToken) // Use REGULAR user token
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(restockJson))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void whenRestockSweetAsAdmin_thenReturns200OkAndIncrementedQuantity() throws Exception {
+        // Arrange: Create a sweet with quantity 10
+        Sweet sweet = sweetRepository.save(new Sweet("Kaju Katli", "North Indian", 7.50, 10));
+        Long sweetId = sweet.getId();
+
+        String restockJson = "{\"quantity\": 50}"; // We are adding 50 more
+
+        // Act & Assert
+        mockMvc.perform(post("/api/sweets/" + sweetId + "/restock")
+                        .header("Authorization", "Bearer " + this.adminAuthToken) // Use ADMIN token
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(restockJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity", is(60))); // Expect total quantity to be 10 + 50 = 60
+    }
 }
 
