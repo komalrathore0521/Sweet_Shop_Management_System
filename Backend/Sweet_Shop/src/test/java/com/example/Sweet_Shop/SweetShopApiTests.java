@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -118,6 +119,23 @@ public class SweetShopApiTests {
                         .header("Authorization", "Bearer " + this.authToken))
                 // We expect a 400 Bad Request status because the data is invalid
                 .andExpect(status().isBadRequest());
+    }
+    @Test
+    void whenGetAllSweets_thenReturns200OkAndListOfSweets() throws Exception {
+        // Arrange: Add a sweet first so the list is not empty.
+        String sweetJson = "{\"name\":\"Jalebi\", \"category\":\"North Indian\", \"price\":1.50, \"quantity\":200}";
+        mockMvc.perform(post("/api/sweets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(sweetJson)
+                        .header("Authorization", "Bearer " + this.authToken))
+                .andExpect(status().isCreated());
+
+        // Act & Assert
+        mockMvc.perform(get("/api/sweets")
+                        .header("Authorization", "Bearer " + this.authToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].name").value("Jalebi"));
     }
 }
 
