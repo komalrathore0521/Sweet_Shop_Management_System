@@ -2,10 +2,13 @@ package com.example.Sweet_Shop.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys; // <-- Import this
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.security.Key; // <-- And import this
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +16,19 @@ import java.util.Map;
 @Service
 public class JwtUtil {
 
-    // 1. Generate a secure, 256-bit key for HS256
-    private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    // 1. Inject the secret from application.properties
+    @Value("${jwt.secret}")
+    private String secret;
+
+    private Key key;
+
+    // 2. This method runs once after the bean is created
+    @PostConstruct
+    public void init() {
+        // Decode the Base64 secret to a Key object
+        byte[] keyBytes = Decoders.BASE64.decode(this.secret);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -27,7 +41,7 @@ public class JwtUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
-                .signWith(SECRET_KEY) // 2. Use the secure Key object to sign
+                .signWith(key, SignatureAlgorithm.HS256) // 3. Use the initialized key
                 .compact();
     }
 }
