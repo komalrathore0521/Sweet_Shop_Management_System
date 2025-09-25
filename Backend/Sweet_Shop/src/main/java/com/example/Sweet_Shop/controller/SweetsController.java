@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,16 @@ public class SweetsController {
         return sweetService.updateSweet(id, sweetDetails)
                 .map(ResponseEntity::ok) // If sweet is found and updated, return 200 OK with the sweet
                 .orElse(ResponseEntity.notFound().build()); // If sweet is not found, return 404 Not Found
+    }
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')") // This enforces the "Admin only" rule
+    public ResponseEntity<Void> deleteSweet(@PathVariable Long id) {
+        boolean isDeleted = sweetService.deleteSweet(id);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build(); // Return 204 No Content on success
+        } else {
+            return ResponseEntity.notFound().build(); // Return 404 if sweet was not found
+        }
     }
 }
 
