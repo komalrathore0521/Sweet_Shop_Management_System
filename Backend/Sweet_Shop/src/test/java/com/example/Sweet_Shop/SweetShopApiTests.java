@@ -137,5 +137,27 @@ public class SweetShopApiTests {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].name").value("Jalebi"));
     }
+
+    @Test
+    void whenSearchSweetsByCategory_thenReturnsMatchingSweets() throws Exception {
+        // Arrange: Add a few sweets with different categories.
+        String sweet1Json = "{\"name\":\"Rasgulla\", \"category\":\"Bengali\", \"price\":2.50, \"quantity\":100}";
+        String sweet2Json = "{\"name\":\"Jalebi\", \"category\":\"North Indian\", \"price\":1.50, \"quantity\":200}";
+        String sweet3Json = "{\"name\":\"Sandesh\", \"category\":\"Bengali\", \"price\":3.00, \"quantity\":50}";
+
+        mockMvc.perform(post("/api/sweets").contentType(MediaType.APPLICATION_JSON).content(sweet1Json).header("Authorization", "Bearer " + this.authToken));
+        mockMvc.perform(post("/api/sweets").contentType(MediaType.APPLICATION_JSON).content(sweet2Json).header("Authorization", "Bearer " + this.authToken));
+        mockMvc.perform(post("/api/sweets").contentType(MediaType.APPLICATION_JSON).content(sweet3Json).header("Authorization", "Bearer " + this.authToken));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/sweets/search")
+                        .param("category", "Bengali") // Search for sweets in the "Bengali" category
+                        .header("Authorization", "Bearer " + this.authToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2)) // Expecting 2 Bengali sweets
+                .andExpect(jsonPath("$[?(@.name == 'Rasgulla')]").exists())
+                .andExpect(jsonPath("$[?(@.name == 'Sandesh')]").exists());
+    }
 }
 
