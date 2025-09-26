@@ -40,7 +40,7 @@ const AppContent: React.FC = () => {
     switch (currentPage) {
       case 'admin':
         return <AdminPanel />;
-      //case 'dashboard':
+      case 'dashboard':
       default:
         return <Dashboard />;
     }
