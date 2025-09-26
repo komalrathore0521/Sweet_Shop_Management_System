@@ -4,6 +4,7 @@ package com.example.Sweet_Shop.service;
 import com.example.Sweet_Shop.exception.InvalidPurchaseException;
 import com.example.Sweet_Shop.model.Sweet;
 import com.example.Sweet_Shop.repository.SweetRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.jpa.domain.Specification;
@@ -102,5 +103,7 @@ public class SweetService {
         // Execute the dynamic query
         return sweetRepository.findAll(spec);
     }
+
+
 }
 

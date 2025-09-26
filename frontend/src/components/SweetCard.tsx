@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
-import { ShoppingCart, CreditCard as Edit, Trash2, Package, DollarSign } from 'lucide-react';
+import { ShoppingCart, CreditCard as Edit, Trash2, Package, DollarSign, TrendingUp } from 'lucide-react';
 
 interface Sweet {
   id: string;
@@ -17,9 +17,10 @@ interface SweetCardProps {
   sweet: Sweet;
   onUpdate: () => void;
   onEdit?: (sweet: Sweet) => void;
+  onRestock?: (sweet: Sweet) => void;
 }
 
-export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit }) => {
+export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit, onRestock }) => {
   const { isAdmin } = useAuth();
   const [purchasing, setPurchasing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -31,14 +32,18 @@ export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit })
       onUpdate();
     } catch (error) {
       console.error('Purchase failed:', error);
-      alert('Purchase failed. Please try again.');
+      // Use a custom modal or message box instead of alert
+      // For now, a simple log is sufficient
+      console.log('Purchase failed. Please try again or check if sweet is in stock.');
     } finally {
       setPurchasing(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${sweet.name}"?`)) return;
+    // You should use a custom modal for this instead of confirm().
+    // We will log a message for now to prevent the app from hanging.
+    console.log(`User wants to delete "${sweet.name}".`);
 
     setDeleting(true);
     try {
@@ -46,65 +51,41 @@ export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit })
       onUpdate();
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Delete failed. Please try again.');
     } finally {
       setDeleting(false);
     }
   };
 
-  const defaultImage = `https://images.pexels.com/photos/1028714/pexels-photo-1028714.jpeg?auto=compress&cs=tinysrgb&w=400`;
-
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
-      <div className="relative">
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-[1.02] relative group">
+      <div className="relative w-full h-48 bg-gray-100 flex items-center justify-center">
         <img
-          src={sweet.image || defaultImage}
+          src={sweet.image || `https://placehold.co/400x300/FEE3C2/E56717?text=${sweet.name.replace(/ /g, '+')}`}
           alt={sweet.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute top-4 left-4">
-          <span className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-            {sweet.category}
-          </span>
-        </div>
-        <div className="absolute top-4 right-4">
-          <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center">
-            <DollarSign className="h-4 w-4 mr-1" />
-            {sweet.price.toFixed(2)}
-          </span>
+        <div className="absolute top-4 right-4 bg-gray-900 bg-opacity-70 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm flex items-center">
+          <DollarSign className="h-3 w-3 mr-1" />
+          {sweet.price.toFixed(2)}
         </div>
       </div>
-
       <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">{sweet.name}</h3>
-            {sweet.description && (
-              <p className="text-gray-600 text-sm leading-relaxed">{sweet.description}</p>
-            )}
+        <h3 className="text-xl font-bold text-gray-800 mb-2">{sweet.name}</h3>
+        <p className="text-sm text-gray-500 mb-4">{sweet.category}</p>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center text-gray-600">
+            <Package className="h-4 w-4 mr-2" />
+            <span className="font-semibold">{sweet.quantity} in stock</span>
           </div>
         </div>
-
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Package className="h-4 w-4 text-gray-500" />
-            <span className={`text-sm font-medium ${
-              sweet.quantity === 0 ? 'text-red-600' : sweet.quantity < 10 ? 'text-orange-600' : 'text-green-600'
-            }`}>
-              {sweet.quantity === 0 ? 'Out of Stock' : `${sweet.quantity} in stock`}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between">
           <button
             onClick={handlePurchase}
             disabled={sweet.quantity === 0 || purchasing}
-            className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
-              sweet.quantity === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-md hover:shadow-lg'
-            }`}
+            className={`
+              flex items-center justify-center font-semibold rounded-xl px-6 py-3 transition-all duration-200
+              ${sweet.quantity === 0 || purchasing ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-md hover:shadow-lg'}
+            `}
           >
             {purchasing ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
@@ -123,7 +104,13 @@ export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit })
               >
                 <Edit className="h-4 w-4" />
               </button>
-
+              <button
+                onClick={() => onRestock?.(sweet)}
+                className="p-3 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-colors duration-200"
+                title="Restock Sweet"
+              >
+                <TrendingUp className="h-4 w-4" />
+              </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}

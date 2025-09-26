@@ -9,9 +9,12 @@ import { AdminPanel } from './components/AdminPanel';
 import { Loader as Loader2 } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { user, loading } = useAuth();
+  // Corrected: Import isAdmin from the useAuth hook
+  const { user, loading, isAdmin } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+
+  // Corrected: Conditionally set the initial currentPage based on the user's role
+  const [currentPage, setCurrentPage] = useState(isAdmin ? 'admin' : 'dashboard');
 
   if (loading) {
     return (
@@ -37,7 +40,7 @@ const AppContent: React.FC = () => {
     switch (currentPage) {
       case 'admin':
         return <AdminPanel />;
-      case 'dashboard':
+      //case 'dashboard':
       default:
         return <Dashboard />;
     }

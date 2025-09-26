@@ -1,6 +1,8 @@
 package com.example.Sweet_Shop.controller;
 
 
+import com.example.Sweet_Shop.dto.RestockRequest;
+import com.example.Sweet_Shop.exception.InvalidPurchaseException;
 import com.example.Sweet_Shop.model.Sweet;
 import com.example.Sweet_Shop.service.SweetService;
 import jakarta.validation.Valid;
@@ -8,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,5 +63,42 @@ public class SweetsController {
             return ResponseEntity.notFound().build(); // Return 404 if sweet was not found
         }
     }
+    @PostMapping("/{id}/purchase")
+    public ResponseEntity<Void> purchaseSweet(@PathVariable Long id) {
+        try {
+            sweetService.purchaseSweet(id);
+            return ResponseEntity.ok().build();
+        } catch (InvalidPurchaseException e) {
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.notFound().build();
+            } else if (e.getMessage().contains("out of stock")) {
+                // A 409 Conflict is appropriate for business logic errors like "out of stock"
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    // New endpoint to restock a sweet
+    @PostMapping("/{id}/restock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Sweet> restockSweet(@PathVariable Long id, @RequestBody RestockRequest req) {
+        try {
+            // --- ADD THIS LOGGING CODE ---
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null) {
+                System.out.println("Principal: " + authentication.getPrincipal());
+                System.out.println("Authorities: " + authentication.getAuthorities());
+            } else {
+                System.out.println("Authentication object is null.");
+            }
+            // -----------------------------
+            Sweet updatedSweet = sweetService.restockSweet(id, req.getQuantity());
+            return ResponseEntity.ok(updatedSweet);
+        } catch (RuntimeException e) {
+            // This handles the "Sweet not found" exception from the service layer
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
 

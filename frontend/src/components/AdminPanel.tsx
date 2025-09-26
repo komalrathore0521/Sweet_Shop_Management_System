@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import { SweetCard } from './SweetCard';
-import { Plus, CreditCard as Edit, Package, ChartBar as BarChart3, Settings } from 'lucide-react';
+// 🛠️ IMPORTED 'X' HERE
+import { Plus, CreditCard as Edit, Package, ChartBar as BarChart3, Settings, X } from 'lucide-react';
 
 interface Sweet {
   id: string;
@@ -42,6 +43,7 @@ export const AdminPanel: React.FC = () => {
   };
 
   const handleRestock = (sweet: Sweet) => {
+    // 🛠️ Restock now opens the modal with the initial sweet data
     setShowRestockModal({ sweet, quantity: 10 });
   };
 
@@ -168,6 +170,7 @@ export const AdminPanel: React.FC = () => {
                 sweet={sweet}
                 onUpdate={fetchSweets}
                 onEdit={handleEdit}
+                onRestock={handleRestock}
               />
             ))}
           </div>
@@ -257,9 +260,20 @@ const SweetFormModal: React.FC<SweetFormModalProps> = ({ sweet, onClose, onSucce
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">
-            {sweet ? 'Edit Sweet' : 'Add New Sweet'}
-          </h3>
+          {/* 🛠️ MODAL HEADER WITH CLOSE BUTTON (Now using imported X icon) */}
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-2xl font-bold text-gray-800">
+              {sweet ? 'Edit Sweet' : 'Add New Sweet'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition"
+              title="Close"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          {/* END MODAL HEADER */}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

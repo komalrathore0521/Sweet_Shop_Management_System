@@ -9,20 +9,30 @@ class ApiService {
     };
   }
 
-  private async handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-      }
+   private async handleResponse<T>(response: Response): Promise<T | null> {
+         if (!response.ok) {
+           if (response.status === 401) {
+             localStorage.removeItem('token');
+             localStorage.removeItem('user');
+             window.location.href = '/login';
+           }
 
-      const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
+           const error = await response.json().catch(() => ({ message: 'An error occurred' }));
+           throw new Error(error.message || `HTTP ${response.status}`);
+         }
 
-    return response.json();
-  }
+         const contentLength = response.headers.get('content-length');
+         if (contentLength === '0' || response.status === 204) {
+             return null;
+         }
+
+         const contentType = response.headers.get('content-type');
+         if (contentType && !contentType.includes('application/json')) {
+             return null;
+         }
+
+         return response.json();
+       }
 
   // Auth endpoints
   async login(username: string, password: string) {
@@ -112,7 +122,7 @@ class ApiService {
   async restockSweet(id: string, quantity: number) {
     const response = await fetch(`${API_BASE_URL}/sweets/${id}/restock`, {
       method: 'POST',
-      headers: this.getAuthHeaders(),
+      headers: {...this.getAuthHeaders(),'Content-Type': 'application/json', },
       body: JSON.stringify({ quantity }),
     });
 
