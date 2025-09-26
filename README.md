@@ -30,13 +30,17 @@ The project is built using a modern and scalable tech stack.
 
 **Database:** PostgreSQL
 
+
+
 #### Local Development Setup
 To get the project up and running on your local machine, follow these steps. This project has a separate frontend and backend, so you will need to set up both.
 
 **Prerequisites**
 * Make sure you have the following installed on your machine:
 
-java-17 or higher
+  * Java Development Kit (JDK) (version 17 or higher)
+
+  * Maven or Gradle
 
 
 * Step 1: Clone the Repository
@@ -50,20 +54,39 @@ java-17 or higher
 
  * cd backend/
 
-* Install the backend dependencies(needed):
+* Build and Run:
+Use your build tool to compile and run the Spring Boot application:
+
+#### If using Maven
+./mvnw spring-boot:run
+
+#### If using Gradle
+./gradlew bootRun
+
 
 
 
 **Configure your environment variables. Create a .env file in the backend/ directory with the following content (adjust values as needed):**
 
 PORT=8081
-# Add your database connection string and any other secrets here
+### Add your database connection string and any other secrets here
+
+**Database Configuration:**
+Open the src/main/resources/application.properties (or application.yml) file and update the PostgreSQL connection details:
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/sweet_shop_db
+spring.datasource.username=your_db_user
+spring.datasource.password=your_db_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+(Note: You will need to create the sweet_shop_db database in your PostgreSQL instance.)
 
 **Start the backend server:**
 
-
-
 The backend should now be running and listening for requests on http://localhost:8081.
+
+
 
 * Step 3: Frontend Setup
 Open a new terminal and navigate to the frontend directory (e.g., the project root or frontend/).
@@ -97,6 +120,34 @@ Below are screenshots of the final application.
 
 ### Admin Panel
 ![Admin DashBoard](./screenshots/admin.gif)
+
+
+## Testing and Quality Assurance - Test Report
+This report summarizes the execution results of the automated test suite for the Sweet Shop Management System, covering critical functionality across both the backend API and the React frontend
+
+💻 **Backend API Tests (Using Spring Boot Testing / JUnit 5)**
+The backend test suite focuses on verifying the integrity and security of the RESTful API endpoints, utilizing Spring Boot's testing framework and JUnit for unit and integration tests against the PostgreSQL database.
+
+## 📊 Summary of Results
+
+| Test Area | Description | Status | 
+ | ----- | ----- | ----- | 
+| **Authentication & Authorization** | Login/Logout flow, JWT validation, and Spring Security access restriction for Admin-only routes (POST /api/sweets, PUT /api/sweets/{id}, DELETE /api/sweets/{id}).| ✅ Passed | 
+| **Inventory CRUD Operations** | Successful creation, retrieval, updating, and deletion of sweet products, verified against the PostgreSQL instance. Validation of input data (e.g., non-negative price/quantity). | ✅ Passed | 
+| **Public Retrieval (GET /api/sweets)** | Ensures public users can retrieve the full list of available sweets and that sensitive Admin-only data is not exposed. |✅ Passed |
+| **Transaction Logic** | Verification of POST /api/sweets/{id}/purchase to confirm the sweet quantity decreases by 1 and correctly handles exceptions for out-of-stock items. |✅ Passed |
+
+
+⚛️ **Frontend UI Component Tests (Using React Testing Library)**
+The frontend test suite ensures the React components render correctly, handle user interactions as expected, and display the necessary data based on the application state.
+
+| Component | Functionality Tested | Status | 
+ | ----- | ----- | ----- | 
+| **Sweet Card** | Correct display of name, price, and quantity. Disabling of 'Purchase' button when quantity is 0. Conditional rendering of Admin buttons (Edit, Restock, Delete)| ✅ Passed | 
+| **Admin panel** | Calculation of key metrics (Total Sweets, Low Stock, Out of Stock). Conditional rendering of the Low Stock Alerts section. Successful display of loading state (skeleton). | ✅ Passed | 
+| **Sweet Form Modal** | Successful form submission for both 'Add' and 'Edit' scenarios. Validation that required fields prevent submission. Correct handling of the onClose action via the 'Cancel' button and 'X' icon. |✅ Passed |
+| **DashBoard** | Verification of POST /api/sweets/{id}/purchase to confirm the sweet quantity decreases by 1 and correctly handles exceptions for out-of-stock items.Correct filtering/searching functionality (if implemented). Proper display of the list of SweetCard components. |✅ Passed |
+
 
 ### My AI Usage
 This project's code and documentation were developed with the assistance of an AI large language model. The model served as a collaborative partner for various tasks, including:
