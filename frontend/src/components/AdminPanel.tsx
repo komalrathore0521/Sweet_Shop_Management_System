@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import { SweetCard } from './SweetCard';
-import { Plus, CreditCard as Edit, Package, BarChart3, Settings } from 'lucide-react';
+import { Plus, CreditCard as Edit, Package, ChartBar as BarChart3, Settings } from 'lucide-react';
 
 interface Sweet {
   id: string;
@@ -379,6 +379,7 @@ const RestockModal: React.FC<RestockModalProps> = ({
       onSuccess();
     } catch (error) {
       console.error('Restock failed:', error);
+      alert('Restock failed. Please try again.');
     } finally {
       setLoading(false);
     }

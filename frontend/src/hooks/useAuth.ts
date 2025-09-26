@@ -1,10 +1,11 @@
 import { useState, useEffect, createContext, useContext } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 interface User {
   id: string;
-  email: string;
-  role: 'admin' | 'customer';
-  name?: string;
+  username: string;
+  role: string;
+  email?: string;
 }
 
 interface AuthContextType {
@@ -25,39 +26,60 @@ export const useAuth = () => {
   return context;
 };
 
+const decodeToken = (token: string): User | null => {
+  try {
+    const decoded: any = jwtDecode(token);
+    return {
+      id: decoded.sub || decoded.username,
+      username: decoded.sub || decoded.username,
+      role: decoded.role || 'ROLE_USER',
+      email: decoded.email,
+    };
+  } catch (error) {
+    console.error('Failed to decode token:', error);
+    return null;
+  }
+};
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
 
-    if (token && userData) {
+    if (token) {
       try {
-        setUser(JSON.parse(userData));
+        const decodedUser = decodeToken(token);
+        if (decodedUser) {
+          setUser(decodedUser);
+        } else {
+          localStorage.removeItem('token');
+        }
       } catch (error) {
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
       }
     }
 
     setLoading(false);
   }, []);
 
-  const login = (token: string, userData: User) => {
+  const login = (token: string, userData?: User) => {
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    
+    if (userData) {
+      setUser(userData);
+    } else {
+      const decodedUser = decodeToken(token);
+      setUser(decodedUser);
+    }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
     setUser(null);
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'ROLE_ADMIN';
 
   return {
     user,

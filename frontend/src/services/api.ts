@@ -25,24 +25,22 @@ class ApiService {
   }
 
   // Auth endpoints
-  async login(email: string, password: string) {
+  async login(username: string, password: string) {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     });
 
-    const data = await this.handleResponse<{ token: string; user: any }>(response);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
+    const data = await this.handleResponse<{ token: string }>(response);
     return data;
   }
 
-  async register(email: string, password: string, name?: string) {
+  async register(username: string, email: string, password: string) {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ username, email, password }),
     });
 
     return this.handleResponse(response);
@@ -102,11 +100,10 @@ class ApiService {
   }
 
   // Inventory endpoints
-  async purchaseSweet(id: string, quantity: number = 1) {
+  async purchaseSweet(id: string) {
     const response = await fetch(`${API_BASE_URL}/sweets/${id}/purchase`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
-      body: JSON.stringify({ quantity }),
     });
 
     return this.handleResponse(response);

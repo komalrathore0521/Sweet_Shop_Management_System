@@ -31,6 +31,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit })
       onUpdate();
     } catch (error) {
       console.error('Purchase failed:', error);
+      alert('Purchase failed. Please try again.');
     } finally {
       setPurchasing(false);
     }
@@ -45,6 +46,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({ sweet, onUpdate, onEdit })
       onUpdate();
     } catch (error) {
       console.error('Delete failed:', error);
+      alert('Delete failed. Please try again.');
     } finally {
       setDeleting(false);
     }

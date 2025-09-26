@@ -11,7 +11,7 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode, isRegister }) => {
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
   });
@@ -26,13 +26,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode, isRegister }
 
     try {
       if (isRegister) {
-        await apiService.register(formData.email, formData.password, formData.name);
+        await apiService.register(formData.username, formData.email, formData.password);
         // After successful registration, log them in
-        const loginData = await apiService.login(formData.email, formData.password);
-        login(loginData.token, loginData.user);
+        const loginData = await apiService.login(formData.username, formData.password);
+        login(loginData.token);
       } else {
-        const data = await apiService.login(formData.email, formData.password);
-        login(data.token, data.user);
+        const data = await apiService.login(formData.username, formData.password);
+        login(data.token);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -67,43 +67,43 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode, isRegister }
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  placeholder="Enter your username"
+                  required
+                />
+              </div>
+            </div>
+
             {isRegister && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
+                  Email Address
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
+                    type="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
                     className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your email"
                     required={isRegister}
                   />
                 </div>
               </div>
             )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

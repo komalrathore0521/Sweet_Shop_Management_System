@@ -56,7 +56,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageCha
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm">
                 <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">{user?.name || user?.email}</span>
+                <span className="text-sm font-medium text-gray-700">{user?.username}</span>
                 {isAdmin && (
                   <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
                     Admin
