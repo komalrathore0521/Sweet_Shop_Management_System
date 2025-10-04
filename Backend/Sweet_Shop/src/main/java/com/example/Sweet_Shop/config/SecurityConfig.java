@@ -1,6 +1,7 @@
 package com.example.Sweet_Shop.config;
 
 import com.example.Sweet_Shop.filter.JwtRequestFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,11 +42,13 @@ public class SecurityConfig {
         return http.build();
     }
     // 2. Add this bean to configure CORS
+    @Value("${frontend.url}")
+    private String frontendurl;
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Allow requests from your React frontend's origin
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Use your frontend's actual port
+        configuration.setAllowedOrigins(Arrays.asList(frontendurl)); // Use your frontend's actual port
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:8081/api';
+const API_BASE_URL = 'https://sweet-shop-iyxw.onrender.com/api';
 
 class ApiService {
   private getAuthHeaders(): HeadersInit {
